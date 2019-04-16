@@ -1,0 +1,61 @@
+REGISTER
+curl -X POST \
+  http://localhost:4000/users/register \
+  -H 'Content-Type: application/json' \
+  -H 'Postman-Token: 2da33741-1c77-4948-b489-8abea158f1b9' \
+  -H 'cache-control: no-cache' \
+  -d '{
+    "firstName": "Wagner",
+    "lastName": "Alves",
+    "email": "w.bit@hotmail.com",
+    "password": "123456"
+}'
+
+
+UPDATE
+curl -X PUT \
+  http://localhost:4000/users/2 \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJuYmYiOjE1NTU0Mzc4NjksImV4cCI6MTU1NjA0MjY2OSwiaWF0IjoxNTU1NDM3ODY5fQ.A6XI3KHpuMapnTBFWt_Pydt4I4p3dBtFxCZiI-vgqLU' \
+  -H 'Content-Type: application/json' \
+  -H 'Postman-Token: e58b127b-4629-4ed2-b63b-811ae983790a' \
+  -H 'cache-control: no-cache' \
+  -d '{
+    "firstName": "Wagner",
+    "lastName": "B",
+    "username": "wbit",
+    "password": "123456"
+}'
+
+
+LOGIN
+curl -X POST \
+  http://localhost:4000/users/authenticate \
+  -H 'Content-Type: application/json' \
+  -H 'Postman-Token: 98d68c4a-09f0-498f-8d21-0515de3e63ed' \
+  -H 'cache-control: no-cache' \
+  -d '{
+    "username": "wagnerbit",
+    "password": "18220592"
+}'
+
+
+GET ALL
+curl -X GET \
+  http://localhost:4000/users \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJuYmYiOjE1NTU0Mzc4NjksImV4cCI6MTU1NjA0MjY2OSwiaWF0IjoxNTU1NDM3ODY5fQ.A6XI3KHpuMapnTBFWt_Pydt4I4p3dBtFxCZiI-vgqLU' \
+  -H 'Postman-Token: 47ba9348-517c-42cc-824c-892c92ea145c' \
+  -H 'cache-control: no-cache'
+
+  
+GET BY ID
+curl -X GET \
+  http://localhost:4000/users/4 \
+  -H 'Postman-Token: 9ad58267-4d36-4c2b-89a4-ba08fe2a7102' \
+  -H 'cache-control: no-cache'
+
+  
+DELETE
+curl -X DELETE \
+  http://localhost:4000/users/3 \
+  -H 'Postman-Token: 5a49f69e-822a-491c-a8b6-d8f9cf8437af' \
+  -H 'cache-control: no-cache'  
