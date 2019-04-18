@@ -6,6 +6,7 @@ using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using WebApi.Dtos;
@@ -70,7 +71,8 @@ namespace WebApi.Controllers {
             try {
                 // save 
                 _userService.Create (user, userDto.Password);
-                return Ok (user);
+                return Ok (new { message = "User created sucessfully!" });
+                //return Ok (user);
             } catch (AppException ex) {
                 // return error message if there was an exception
                 return BadRequest (new { message = ex.Message });
@@ -93,17 +95,23 @@ namespace WebApi.Controllers {
 
         [HttpPut ("{id}")]
         public IActionResult Update (int id, [FromBody] UserDto userDto) {
-            // map dto to entity and set id
+            // Map DTO to Entity and Set ID
             var user = _mapper.Map<User> (userDto);
             user.Id = id;
 
             try {
                 // save 
                 var userResponse = _userService.Update (user, userDto.Password);
-                var userDtos = _mapper.Map<IList<UserDto>> (userResponse);
-                return Ok (userDtos);
+                var userDtos = _mapper.Map<UserDto> (userResponse);
+
+                return Ok (new {
+                    statusCode = StatusCode (Microsoft.AspNetCore.Http.StatusCodes.Status200OK),
+                        userDtos.FirstName,
+                        userDtos.LastName,
+                        userDtos.Email
+                });
             } catch (AppException ex) {
-                // return error message if there was an exception
+                // It will return an error message if there are an exception
                 return BadRequest (new { message = ex.Message });
             }
         }
