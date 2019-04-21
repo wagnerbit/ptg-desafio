@@ -23,7 +23,7 @@ namespace WebApi {
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices (IServiceCollection services) {
             services.AddCors ();
-            services.AddDbContext<DataContext> (x => x.UseInMemoryDatabase ("TestDb"));
+            services.AddDbContext<DataContext> (x => x.UseInMemoryDatabase ("ptgDb"));
             services.AddMvc ().SetCompatibilityVersion (CompatibilityVersion.Version_2_2);
             services.AddAutoMapper ();
 
@@ -63,17 +63,22 @@ namespace WebApi {
 
             // setting up DI for application services
             services.AddScoped<IUserService, UserService> ();
+            services.AddScoped<IPhoneService, PhoneService> ();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure (IApplicationBuilder app, IHostingEnvironment env) {
+
+            app.UseDefaultFiles ();
+            app.UseStaticFiles ();
+
+            app.UseAuthentication ();
+
             // global cors policy
             app.UseCors (x => x
                 .AllowAnyOrigin ()
                 .AllowAnyMethod ()
                 .AllowAnyHeader ());
-
-            app.UseAuthentication ();
 
             app.UseMvc ();
         }

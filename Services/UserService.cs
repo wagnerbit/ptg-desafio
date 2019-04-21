@@ -1,6 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using WebApi.Entities;
 using WebApi.Helpers;
 
@@ -10,56 +19,69 @@ namespace WebApi.Services {
         IEnumerable<User> GetAll ();
         User GetById (int id);
         User Create (User user, string password);
-        User Update (User user, string password = null);
+        User Update (User user, string password = null, bool?fromAuth = false);
         void Delete (int id);
+        object GenerateToken (User user);
     }
 
     public class UserService : IUserService {
+        IMapper mapper;
         private DataContext _context;
+        private IMapper _mapper;
+        private readonly AppSettings _appSettings;
 
-        public UserService (DataContext context) {
+        public UserService (DataContext context, IOptions<AppSettings> appSettings) {
             _context = context;
+            _mapper = mapper;
+            _appSettings = appSettings.Value;
         }
 
         public User Authenticate (string email, string password) {
+
             if (string.IsNullOrEmpty (email) || string.IsNullOrEmpty (password))
                 return null;
 
             var user = _context.Users.SingleOrDefault (x => x.Email == email);
 
-            // check if email exists
             if (user == null)
                 return null;
 
-            // check if password is correct
             if (!VerifyPasswordHash (password, user.PasswordHash, user.PasswordSalt))
                 return null;
 
-            // authentication successful
             return user;
         }
 
         public IEnumerable<User> GetAll () {
-            return _context.Users;
+            var users = _context.Users
+                .Include (p => p.Phones)
+                .ToArray ();
+
+            return users;
         }
 
         public User GetById (int id) {
-            return _context.Users.Find (id);
+            return _context.Users.Where (u => u.Id == id)
+                .Include (p => p.Phones)
+                .SingleOrDefault ();
         }
 
         public User Create (User user, string password) {
             // validation
             if (string.IsNullOrWhiteSpace (password))
-                throw new AppException ("Password is required");
+                throw new AppException ("Password is required", 400);
 
-            if (_context.Users.Any (x => x.Email == user.Email))
-                throw new AppException ("Email is already taken");
+            if (_context.Users.Any (x => x.Email.ToLower () == user.Email.ToLower ()))
+                throw new AppException ("Email is already taken", 422);
+                
 
             byte[] passwordHash, passwordSalt;
             CreatePasswordHash (password, out passwordHash, out passwordSalt);
 
+            user.Email = user.Email.ToLower ();
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
+            user.Created_At = DateTime.Now;
 
             _context.Users.Add (user);
             _context.SaveChanges ();
@@ -67,7 +89,8 @@ namespace WebApi.Services {
             return user;
         }
 
-        public User Update (User userParam, string password = null) {
+        public User Update (User userParam, string password = null, bool? fromAuth = false) {
+
             var user = _context.Users.Find (userParam.Id);
 
             if (user == null)
@@ -82,7 +105,9 @@ namespace WebApi.Services {
             // update user properties
             user.FirstName = userParam.FirstName;
             user.LastName = userParam.LastName;
-            user.Email = userParam.Email;
+            user.Email = userParam.Email.ToLower ();
+            user.Phones = userParam.Phones;
+            user.Last_Login = fromAuth == true ? DateTime.Now : userParam.Last_Login;
 
             // update password if it was entered
             if (!string.IsNullOrWhiteSpace (password)) {
@@ -100,7 +125,11 @@ namespace WebApi.Services {
 
         public void Delete (int id) {
             var user = _context.Users.Find (id);
-            if (user != null) {
+            if (user == null) {
+
+
+
+            } else {
                 _context.Users.Remove (user);
                 _context.SaveChanges ();
             }
@@ -129,8 +158,35 @@ namespace WebApi.Services {
                     if (computedHash[i] != storedHash[i]) return false;
                 }
             }
-
             return true;
         }
+
+        public object GenerateToken (User user) {
+
+            DateTime generatedDate = DateTime.Now;
+            DateTime expiresDate = DateTime.UtcNow.AddDays (7);
+
+            var tokenHandler = new JwtSecurityTokenHandler ();
+            var key = Encoding.ASCII.GetBytes (_appSettings.Secret);
+            var tokenDescriptor = new SecurityTokenDescriptor {
+                Subject = new ClaimsIdentity (new Claim[] {
+                new Claim (ClaimTypes.Name, user.Id.ToString ())
+                }),
+                NotBefore = generatedDate,
+                Expires = expiresDate,
+                SigningCredentials = new SigningCredentials (new SymmetricSecurityKey (key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken (tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken (token);
+
+            return new {
+                authenticated = true,
+                    generatedDate = generatedDate.ToString ("dd/MM/yyyy HH:mm:ss"),
+                    expirationDate = expiresDate.ToString ("dd/MM/yyyy HH:mm:ss"),
+                    accessToken = tokenHandler.WriteToken (token)
+            };
+
+        }
+
     }
 }
