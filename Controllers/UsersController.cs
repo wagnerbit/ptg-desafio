@@ -102,11 +102,11 @@ namespace WebApi.Controllers {
 
             //Return user info (without password) plus token to store in the client side
             return Ok (new {
-                    Id = user.Id,
+                Id = user.Id,
                     firstName = user.FirstName,
                     lastName = user.LastName,
                     email = user.Email,
-                    phones = phones                    
+                    phones = phones
             });
         }
 
@@ -138,8 +138,12 @@ namespace WebApi.Controllers {
         [UserIdentityValidatorsMiddleware]
         [HttpDelete ("{id}")]
         public IActionResult Delete (int id) {
-            _userService.Delete (id);
-            return Ok ();
+            try {
+                _userService.Delete (id);
+                return Ok ();
+            } catch (AppException ex) {
+                return BadRequest (new { message = ex.Message, statusCode = 400 });
+            }
         }
     }
 }

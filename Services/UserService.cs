@@ -73,7 +73,6 @@ namespace WebApi.Services {
 
             if (_context.Users.Any (x => x.Email.ToLower () == user.Email.ToLower ()))
                 throw new AppException ("Email is already taken", 422);
-                
 
             byte[] passwordHash, passwordSalt;
             CreatePasswordHash (password, out passwordHash, out passwordSalt);
@@ -126,9 +125,7 @@ namespace WebApi.Services {
         public void Delete (int id) {
             var user = _context.Users.Find (id);
             if (user == null) {
-
-
-
+                throw new AppException ("Invalid UserId");
             } else {
                 _context.Users.Remove (user);
                 _context.SaveChanges ();
