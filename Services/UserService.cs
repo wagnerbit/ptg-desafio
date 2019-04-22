@@ -17,6 +17,7 @@ namespace WebApi.Services {
     public interface IUserService {
         User Authenticate (string email, string password);
         IEnumerable<User> GetAll ();
+        User GetByEmail (string email);
         User GetById (int id);
         User Create (User user, string password);
         User Update (User user, string password = null, bool?fromAuth = false);
@@ -57,7 +58,15 @@ namespace WebApi.Services {
                 .Include (p => p.Phones)
                 .ToArray ();
 
+                
+
             return users;
+        }
+
+        public User GetByEmail (string email) {
+            return _context.Users.Where (u => u.Email.ToLower () == email.ToLower ())
+                .Include (p => p.Phones)
+                .SingleOrDefault ();
         }
 
         public User GetById (int id) {

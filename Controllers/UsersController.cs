@@ -10,9 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using WebApi.Dtos;
 using WebApi.Entities;
 using WebApi.Helpers;
+using WebApi.Mapping;
 using WebApi.Middlewares;
 using WebApi.Services;
 
@@ -38,7 +38,7 @@ namespace WebApi.Controllers {
         }
 
         [AllowAnonymous]
-        [HttpPost ("authenticate")]
+        [HttpPost ("signin")]
         public IActionResult Authenticate ([FromBody] UserDto userDto) {
             var user = _userService.Authenticate (userDto.Email, userDto.Password);
 
@@ -68,7 +68,7 @@ namespace WebApi.Controllers {
         }
 
         [AllowAnonymous]
-        [HttpPost ("register")]
+        [HttpPost ("signup")]
         public IActionResult Register ([FromBody] UserDto userDto) {
             // Map dto to entity
             var user = _mapper.Map<User> (userDto);
@@ -95,10 +95,14 @@ namespace WebApi.Controllers {
         }
 
         [UserIdentityValidatorsMiddleware]
-        [HttpGet ("{id}")]
-        public IActionResult GetById (int id) {
-            var user = _userService.GetById (id);
-            var phones = _phoneService.GetById (id);
+        [HttpGet ("me")]
+        public IActionResult Me ([FromQuery (Name = "email")] string email) {
+
+            if (string.IsNullOrEmpty (email)) {
+                return BadRequest (new { message = "Missing email", statusCode = 400 });
+            }
+            var user = _userService.GetByEmail (email);
+            var phones = _phoneService.GetById (user.Id);
 
             //Return user info (without password) plus token to store in the client side
             return Ok (new {

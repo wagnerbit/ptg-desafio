@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using WebApi.Entities;
 
-namespace WebApi.Dtos {
+namespace WebApi.Mapping {
     public class UserDto {
         public int Id { get; set; }
         public string FirstName { get; set; }

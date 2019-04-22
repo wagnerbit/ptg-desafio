@@ -1,0 +1,78 @@
+SIGNUP
+
+POST /users/signup HTTP/1.1
+Host: localhost:4000
+Content-Type: application/json
+cache-control: no-cache
+Postman-Token: ea7597b8-8d0c-49fd-b4e4-76ccc751fb8f
+{
+    "firstName": "Hello",
+    "lastName": "World",
+    "email": "hello@world.com",
+    "password": "hunter2",
+    "phones": [
+        {
+            "number": 988887888,
+            "area_code": 81,
+            "country_code": "+55"
+        }
+    ]
+}
+
+SIGNIN
+
+POST /users/signin HTTP/1.1
+Host: localhost:4000
+Content-Type: application/json
+cache-control: no-cache
+Postman-Token: 37117e0a-7a61-4607-9496-e03222555834
+{
+     "email": "hello@world.com",
+    "password": "hunter2"
+}
+
+
+ME 
+
+GET /users/me?email=hello@world.com HTTP/1.1
+Host: localhost:4000
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjEiLCJuYmYiOjE1NTU4ODM1MzcsImV4cCI6MTU1NjQ4ODMzNywiaWF0IjoxNTU1ODgzNTM3fQ.zhgdL220X_We0BulH-7zqxAv8pAQHXUN6VM1xV7uXN4
+cache-control: no-cache
+Postman-Token: 11f7cde6-4978-491f-9435-3cee5dab94a3
+
+
+UPDATE
+
+PUT /users/1 HTTP/1.1
+Host: localhost:4000
+Content-Type: application/json
+cache-control: no-cache
+Postman-Token: 822f2177-ba31-44fd-ae5c-6f4c8f561966
+{
+    "firstName": "Wagner B",
+    "lastName": "Alves",
+    "email": "w.bit@hotmail.com",
+    "password": "123456"
+    
+}
+
+
+
+DELETE
+
+DELETE /users/2 HTTP/1.1
+Host: localhost:4000
+cache-control: no-cache
+Postman-Token: 409acc1b-632f-4059-8697-bb9385169fe4
+
+
+
+GET ALL
+curl -X GET \
+  http://localhost:4000/users \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjIiLCJuYmYiOjE1NTU0Mzc4NjksImV4cCI6MTU1NjA0MjY2OSwiaWF0IjoxNTU1NDM3ODY5fQ.A6XI3KHpuMapnTBFWt_Pydt4I4p3dBtFxCZiI-vgqLU' \
+  -H 'Postman-Token: 47ba9348-517c-42cc-824c-892c92ea145c' \
+  -H 'cache-control: no-cache'
+
+  
+

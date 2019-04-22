@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using WebApi.Helpers;
+using WebApi.Middlewares;
 using WebApi.Services;
 
 namespace WebApi {
@@ -26,6 +27,7 @@ namespace WebApi {
             services.AddDbContext<DataContext> (x => x.UseInMemoryDatabase ("ptgDb"));
             services.AddMvc ().SetCompatibilityVersion (CompatibilityVersion.Version_2_2);
             services.AddAutoMapper ();
+            services.AddValidators ();
 
             // setting up strongly typed settings objects
             var appSettingsSection = Configuration.GetSection ("AppSettings");
